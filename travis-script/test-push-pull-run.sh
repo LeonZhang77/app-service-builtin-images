@@ -45,6 +45,9 @@ if [ -n "${signOff}" ]; then #contains "#Sign-off"
 fi
 if [ $DOCKER_ACCOUNT == $PROD_DOCKER_ACCOUNT ]; then #It's master branch
     echo "INFORMATION - This time, push to PROD docker hub....."
+    export DOCKER_CONTENT_TRUST=1
+    export DOCKER_CONTENT_TRUST_ROOT_PASSPHRASE="isnes21@MAM"
+    export DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE="isnes21@MAM"
     isSignOff="true"    
 else
     echo "INFORMATION - This time push to TEST docker hub......"    
@@ -102,4 +105,10 @@ if [ $isSignOff == "true" ]; then #Is it "#sign-off" or "master_brnach"?
     else
         _do cd ..
     fi    
+fi
+#clean up
+if [ $DOCKER_ACCOUNT == $PROD_DOCKER_ACCOUNT ]; then #It's master branch    
+    export -n DOCKER_CONTENT_TRUST
+    export -n DOCKER_CONTENT_TRUST_ROOT_PASSPHRASE
+    export -n DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE    
 fi
