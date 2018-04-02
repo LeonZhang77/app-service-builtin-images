@@ -45,12 +45,20 @@ if [ -n "${signOff}" ]; then #contains "#Sign-off"
 fi
 if [ $DOCKER_ACCOUNT == $PROD_DOCKER_ACCOUNT ]; then #It's master branch
     echo "INFORMATION - This time, push to PROD docker hub....."
+    echo "export CONTENT_TRUST"
+    echo $ROOT_PASSPHRASE
+    echo $REPOSITORY_PASSPHRASE
+    export DOCKER_CONTENT_TRUST=1
+    export DOCKER_CONTENT_TRUST_ROOT_PASSPHRASE="$ROOT_PASSPHRASE"
+    export DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE="$REPOSITORY_PASSPHRASE"
     isSignOff="true"    
 else
     echo "INFORMATION - This time push to TEST docker hub......"    
 fi
-
-_do echo "${DOCKER_PASSWORD}" | _do docker login "${DOCKER_ACCOUNT}" -u="${DOCKER_USERNAME}" --password-stdin
+#For ACR
+#_do echo "${DOCKER_PASSWORD}" | _do docker login "${DOCKER_ACCOUNT}" -u="${DOCKER_USERNAME}" --password-stdin
+#For hub
+_do echo "${DOCKER_PASSWORD}" | _do docker login -u="${DOCKER_USERNAME}" --password-stdin
 
 if [ $isSignOff == "true" ]; then
     echo "INFORMATION - This time, set tag as "${DOCKER_IMAGE_VERSION}" and push....."    
@@ -102,4 +110,10 @@ if [ $isSignOff == "true" ]; then #Is it "#sign-off" or "master_brnach"?
     else
         _do cd ..
     fi    
+fi
+#clean up
+if [ $DOCKER_ACCOUNT == $PROD_DOCKER_ACCOUNT ]; then #It's master branch    
+    export -n DOCKER_CONTENT_TRUST
+    export -n DOCKER_CONTENT_TRUST_ROOT_PASSPHRASE
+    export -n DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE    
 fi
